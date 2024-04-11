@@ -1,0 +1,18 @@
+Status: active
+
+To                         Action      From
+--                         ------      ----
+Apache Full                ALLOW       Anywhere
+22/tcp                     ALLOW       Anywhere
+Bind9                      ALLOW       Anywhere
+21/tcp                     ALLOW       Anywhere
+443                        ALLOW       Anywhere
+20/tcp                     ALLOW       Anywhere
+40000:50000/tcp            ALLOW       Anywhere
+Apache Full (v6)           ALLOW       Anywhere (v6)
+22/tcp (v6)                ALLOW       Anywhere (v6)
+Bind9 (v6)                 ALLOW       Anywhere (v6)
+21/tcp (v6)                ALLOW       Anywhere (v6)
+443 (v6)                   ALLOW       Anywhere (v6)
+20/tcp (v6)                ALLOW       Anywhere (v6)
+40000:50000/tcp (v6)       ALLOW       Anywhere (v6)
