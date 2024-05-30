@@ -1,0 +1,135 @@
+
+PROMEHEUS:
+
+sudo apt-get install prometheus
+
+sudo ufw allow 9090/tcp
+
+sudo systemctl start prometheus
+
+(NAVEGADOR) http://192.168.60.3:9090
+
+cd /etc/prometheus
+sudo vim prometheus.yml
+
+# Sample config for Prometheus.
+
+[global:
+  scrape_interval:     15s # Set the scrape interval to every 15 seconds. Default is every 1 minute.
+  evaluation_interval: 15s # Evaluate rules every 15 seconds. The default is every 1 minute.
+  # scrape_timeout is set to the global default (10s).
+
+  # Attach these labels to any time series or alerts when communicating with
+  # external systems (federation, remote storage, Alertmanager).
+  external_labels:
+      monitor: 'example'
+
+# Alertmanager configuration
+alerting:
+  alertmanagers:
+  - static_configs:
+    - targets: ['localhost:9093']
+
+# Load rules once and periodically evaluate them according to the global 'evaluation_interval'.
+rule_files:
+  # - "first_rules.yml"
+  # - "second_rules.yml"
+
+# A scrape configuration containing exactly one endpoint to scrape:
+# Here it's Prometheus itself.
+scrape_configs:
+  # The job name is added as a label `job=<job_name>` to any timeseries scraped from this config.
+  - job_name: 'prometheus'
+
+    # Override the global default and scrape targets from this job every 5 seconds.
+    scrape_interval: 5s
+    scrape_timeout: 5s
+
+    # metrics_path defaults to '/metrics'
+    # scheme defaults to 'http'.
+
+    static_configs:
+      - targets: ['localhost:9090']
+
+  - job_name: node
+    # If prometheus-node-exporter is installed, grab stats about the local
+    # machine by default.
+    static_configs:
+      - targets: ['localhost:9100','192.168.50.2:9100','192.168.50.4:9100']
+]
+
+_____________________________________________________________________________________________________________________________
+node exporter:
+
+wget https://github.com/prometheus/node_exporter/releases/download/v1.8.1/node_exporter-1.8.1.linux-amd64.tar.gz
+
+tar -xzf node_exporter-1.8.1.linux-amd64.tar.gz
+
+cd node_exporter-1.8.1.linux-amd64
+
+sudo mv node_exporter-1.8.1.linux-amd64/node_exporter /usr/local/bin/
+
+sudo useradd --no-create-home --shell /bin/false node_exporter
+
+sudo vim /etc/systemd/system/node_exporter.service
+[Unit]
+Description=Node Exporter
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+User=node_exporter
+Group=node_exporter
+Type=simple
+ExecStart=/usr/local/bin/node_exporter
+
+[Install]
+WantedBy=multi-user.target
+
+sudo systemctl daemon-reload
+sudo systemctl start node_exporter
+sudo systemctl enable node_exporter
+
+
+(NAVEGADOR) http://192.168.60.3:9100/metrics
+__________________________________________________________________________________________________________________________________
+
+
+GRAFANA:
+
+wget https://dl.grafana.com/enterprise/release/grafana-enterprise-11.0.0.linux-amd64.tar.gz
+tar -zxvf grafana-enterprise-11.0.0.linux-amd64.tar.gz
+
+cd grafana-v11.0.0
+
+./bin/grafana-server
+
+
+(NAVEGADOR) http://192.168.60.3:3000/login
+
+admin
+admin
+
+ó
+
+sudo apt-get install -y software-properties-common
+
+sudo add-apt-repository "deb [arch=amd64] https://packages.grafana.com/oss/deb stable main"
+
+# Descargar la clave GPG y guardarla en el directorio recomendado
+wget -q -O - https://packages.grafana.com/gpg.key | sudo apt-key add -
+
+# Agregar el repositorio de Grafana utilizando el nuevo método
+#echo "deb [signed-by=/usr/share/keyrings/grafana-archive-keyring.gpg] https://packages.grafana.com/oss/deb stable main" | sudo tee /etc/apt/sources.list.d/grafana.list > /dev/null
+#echo "deb [signed-by=/usr/share/keyrings/grafana-archive-keyring.gpg] https://packages.grafana.com/oss/deb stable main" | sudo tee /etc/apt/sources.list.d/grafana.list
+# Actualizar la lista de paquetes
+sudo apt-get update
+
+# Instalar Grafana
+sudo apt-get install grafana
+
+# Iniciar y habilitar Grafana
+sudo systemctl start grafana-server
+sudo systemctl enable grafana-server
+
+
